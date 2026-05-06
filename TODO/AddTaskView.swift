@@ -34,7 +34,7 @@ struct AddTaskView: View {
                                 taskColor = color
                             }
                     }
-                }
+                } 
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
 
