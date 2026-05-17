@@ -6,12 +6,24 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct TODOApp: App {
+    let container: ModelContainer
+    let viewModel: TodoViewModel
+
+    init() {
+        let container = try! ModelContainer(for: TodoItem.self)
+        self.container = container
+        self.viewModel = TodoViewModel(modelContext: container.mainContext)
+    }
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainTabView()
+                .modelContainer(container)
+                .environment(viewModel)
         }
     }
 }

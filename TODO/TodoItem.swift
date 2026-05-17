@@ -6,36 +6,80 @@
 //
 
 import SwiftUI
+import SwiftData
 
-enum TaskColor: String, CaseIterable {
-    case yellow = "yellow"
-    case red = "red"
-    case blue = "blue"
-    case green = "green"
+
+enum TaskIcon: String, CaseIterable, Codable {
+    case work = "briefcase"
+    case gym = "dumbbell"
+    case health = "heart"
+    case house = "house"
+    case science = "book.pages"
+    case hobby = "paintbrush"
+    case food = "cart"
+    case social = "person.2"
+    case money = "creditcard"
+    case travel = "airplane"
     
-    var color: Color {
+    var label: String {
         switch self {
-        case .red: return .red
-        case .blue: return .blue
-        case .green: return .green
-        case .yellow: return .yellow
+        case .work: return "Work"
+        case .gym: return "Sport"
+        case .health: return "Health"
+        case .house: return "Home"
+        case .science: return "Study"
+        case .hobby: return "Hobby"
+        case .food: return "Food"
+        case .social: return "Social"
+        case .money: return "Finance"
+        case .travel: return "Travel"
         }
     }
 }
 
-enum TaskIcon: String, CaseIterable {
-    case star = "star.fill"
-    case heart = "heart.fill"
-    case book = "book.fill"
-    case house = "house.fill"
-    case briefcase = "briefcase.fill"
+enum TaskPriority: String, CaseIterable, Codable {
+    case none = "-"
+    case low = "exclamationmark"
+    case medium = "exclamationmark.2"
+    case high = "exclamationmark.3"
+    
+    var label: String {
+        switch self {
+        case .none: return "No Prio"
+        case .low: return "Low"
+        case .medium: return "Medium"
+        case .high: return "High"
+        }
+    }
 }
 
-struct TodoItem {
-    let id: UUID = UUID()
+
+struct TaskSection: Identifiable, Equatable {
+    var id: String {
+        title
+    }
     var title: String
+    var items: [TodoItem]
+}
+
+
+@Model
+class TodoItem: Equatable {
+    var id: UUID = UUID()
+    var title : String
     var isCompleted: Bool = false
-    var description: String = ""
-    var icon: TaskIcon = .star
-    var color: TaskColor = .yellow
+    var note: String?
+    var icon: TaskIcon
+    var dueDate: Date
+    var priority: TaskPriority
+    
+    
+    init(title: String, note: String? = nil, icon: TaskIcon = .work, dueDate: Date = Date(), priority: TaskPriority = .low) {
+        self.title = title
+        self.note = note
+        self.icon = icon
+        self.dueDate = dueDate
+        self.priority = priority
+    }
+    
 }

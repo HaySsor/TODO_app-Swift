@@ -6,13 +6,36 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct TodayView: View {
+    
+    @Query var tasks : [TodoItem]
+    
+    var grupedByStatus: [TaskSection] {
+        let today: [TodoItem] = tasks.filter {
+            return Calendar.current.isDateInToday($0.dueDate)
+        }
+        
+        let noComplited = today.filter { !$0.isCompleted }
+        let complited = today.filter { $0.isCompleted }
+        
+        return [
+            TaskSection(title: "Not completed", items: noComplited),
+            TaskSection(title: "Completed", items: complited)
+        ]
+    }
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        
+        TaskPageView(title:"Today", sections: grupedByStatus)
+       
     }
 }
 
 #Preview {
+    let container = try! ModelContainer(for: TodoItem.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
     TodayView()
+        .modelContainer(container)
+        .environment(TodoViewModel(modelContext: container.mainContext))
 }

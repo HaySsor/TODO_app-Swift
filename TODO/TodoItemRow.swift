@@ -11,45 +11,76 @@ struct TodoItemRow: View {
     var item: TodoItem
     var onToggle: () -> Void
     
-    var body: some View{
-        HStack {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .frame(width: 40, height: 40)
-                    .foregroundStyle(item.color.color)
-                Image(systemName: item.icon.rawValue)
-                    .font(.title2)
-                    .foregroundStyle(.white)
-            }
-            VStack(alignment: .leading){
-                Text(item.title)
-                    .strikethrough(item.isCompleted)
-                    .foregroundStyle(item.isCompleted ? .gray : .primary)
-                    .font(.headline)
-                    .lineLimit(1)
-                
-                if !item.description.isEmpty {
-                    Text(item.description)
-                        .font(.caption)
-                        .foregroundStyle(.gray)
-                        .lineLimit(2)
-                }
-                
-            }
-            
-            Spacer()
+    var formattedTime: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: item.dueDate)
+    }
+    
+    var body: some View {
+
+        HStack(spacing: 12) {
             Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                 .font(.title2)
+                .foregroundStyle(.yellow)
+                .onTapGesture {
+                    onToggle()
+                }
+                
+            Divider().frame(height: 30)
+                .background(.gray)
+            NavigationLink {
+                EditTaskView(task: item)
+            } label: {
+                HStack(spacing: 12) {
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 4) {
+                            Image(systemName: item.icon.rawValue)
+                                .font(.headline)
+                                .foregroundStyle(.black)
+                            
+                            if item.priority != .none {
+                                Image(systemName: item.priority.rawValue)
+                                    .font(.caption)
+                                    .foregroundStyle(.red)
+                            }
+                            Text(item.title)
+                                .strikethrough(item.isCompleted)
+                                .foregroundStyle(item.isCompleted ? .gray : .primary)
+                                .font(.headline)
+                                .lineLimit(1)
+
+                        }
+
+                        HStack(spacing: 4) {
+                            Text(formattedTime)
+                                .font(.caption)
+                                .foregroundStyle(.gray)
+                            if let note = item.note, !note.isEmpty {
+                                Text("·")
+                                    .font(.caption)
+                                    .foregroundStyle(.gray)
+                                Text(note)
+                                    .font(.caption)
+                                    .foregroundStyle(.gray)
+                                    .lineLimit(1)
+                            }
+                        }
+                    }
+
+                    Spacer()
+                }
+            }
         }
         .contentShape(Rectangle())
-        .onTapGesture {
-            onToggle()
-        }
     }
 }
 
 
 
 #Preview {
-    TodoItemRow(item: TodoItem(title: "Przykładowe zadanie",description: "Przykladowy opis", icon: .star, color: .yellow), onToggle: { })
+    NavigationStack {
+        TodoItemRow(item: TodoItem(title: "Przykładowe zadanie", note: "Przykladowy opis", icon: .work, dueDate: Calendar.current.date(bySettingHour: 10, minute: 30, second: 0, of: Date())!), onToggle: { })
+    }
 }

@@ -11,38 +11,16 @@ struct AddTaskView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var title: String = ""
-    @State private var description: String = ""
-    @State private var taskIcon : TaskIcon = .star
+    @State private var note: String?
+    @State private var taskIcon : TaskIcon = .work
+    @State private var dueDate: Date = Date()
+    @State private var priority: TaskPriority = .none
     
     var onAdd: (TodoItem) -> Void
     
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Title") {
-                    TextField("what needs to be done...", text: $title)
-                }
-                Section("Description") {
-                    TextEditor(text: $description)
-                        .frame(height: 120)
-                }
-
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5)) {
-                    ForEach(TaskIcon.allCases, id: \.self) { icon in
-                        ZStack {
-                            SelectableCircle(isSelected: icon == taskIcon, strokeColor: .black)
-                            Image(systemName: icon.rawValue)
-                                .foregroundStyle(.white)
-                                .font(.title3)
-                        }
-                        .frame(width: 40, height: 40)
-                        .onTapGesture {
-                            taskIcon = icon
-                        }
-                    }
-                }
-                .listRowBackground(Color.clear)
-            }
+            TaskFormFields(title: $title, note: $note, dueDate: $dueDate, icon: $taskIcon, priority: $priority)
             .navigationTitle("New task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -52,11 +30,12 @@ struct AddTaskView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        let newItem = TodoItem(title: title, description: description, icon: taskIcon)
+                        let newItem = TodoItem(title: title, note: note, icon: taskIcon, dueDate: dueDate, priority: priority)
                         onAdd(newItem)
                         dismiss()
                     }.buttonStyle(.borderedProminent)
                         .tint(.black)
+                        .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
         }

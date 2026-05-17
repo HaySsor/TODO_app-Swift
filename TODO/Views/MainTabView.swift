@@ -6,13 +6,42 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MainTabView: View {
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        TabView {
+            TodayView()
+                .tabItem {
+                    Image(systemName: "sun.min")
+                    Text("Today")
+                }
+            AllTasks()
+                .tabItem {
+                    Image(systemName: "calendar")
+                    Text("All")
+                }
+            Text("Stats")
+                .tabItem {
+                    Image(systemName: "chart.bar")
+                    Text("Stats")
+                }
+            Text("Settings")
+                .tabItem {
+                    Image(systemName: "gear")
+                    Text("Settings")
+                }
+            
+            
+        }
+        .tint(.black)
     }
 }
 
 #Preview {
+    let container = try! ModelContainer(for: TodoItem.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
     MainTabView()
+        .modelContainer(container)
+        .environment(TodoViewModel(modelContext: container.mainContext))
 }
