@@ -13,6 +13,9 @@ struct TaskFormFields: View {
     @Binding var dueDate: Date
     @Binding var icon: TaskIcon
     @Binding var priority: TaskPriority
+    @Binding var hasTime: Bool
+    @Binding var hasReminder: Bool
+    @Binding var reminderOffset: ReminderOffset
     
     
     var body: some View {
@@ -57,12 +60,32 @@ struct TaskFormFields: View {
             }
 
             Section("Details"){
-                DatePicker("Select date", selection: $dueDate)
                 Picker("Priority", selection: $priority) {
                     ForEach(TaskPriority.allCases, id: \.self){ prio in
                         Text(prio.label).tag(prio)
                     }
                 }.pickerStyle(.segmented)
+                Toggle("Include time", isOn: $hasTime.animation())
+                    .onChange(of: hasTime) {oldValue, newValue in
+                        if !newValue {
+                            hasReminder = false
+                        }
+                    }
+                if hasTime {
+                    DatePicker("Select date", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
+                } else {
+                    DatePicker("Select date", selection: $dueDate, displayedComponents: .date)
+                }
+                if hasTime {
+                    Toggle("Add reminder", isOn: $hasReminder.animation())
+                    if hasReminder {
+                        Picker("Reminder", selection: $reminderOffset) {
+                            ForEach(ReminderOffset.allCases, id: \.self){ offset in
+                                Text(offset.label).tag(offset)
+                            }
+                        }.pickerStyle(.automatic)
+                    }
+                }
             }
             
             
@@ -76,6 +99,9 @@ struct TaskFormFields: View {
         note: .constant("Mleko, chleb, jajka"),
         dueDate: .constant(Date()),
         icon: .constant(.work),
-        priority: .constant(.low)
+        priority: .constant(.low),
+        hasTime: .constant(false),
+        hasReminder: .constant(true),
+        reminderOffset: .constant(.tenMin)
     )
 }

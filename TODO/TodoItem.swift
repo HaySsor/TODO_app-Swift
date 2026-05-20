@@ -51,6 +51,35 @@ enum TaskPriority: String, CaseIterable, Codable {
         case .high: return "High"
         }
     }
+    
+    var sortValue : Int {
+        switch self {
+        case .none: return 0
+        case .low: return 1
+        case .medium: return 2
+        case .high: return 3
+        }
+    }
+}
+
+enum ReminderOffset: Int, CaseIterable, Codable {
+    case atTime = 0
+    case tenMin = 10
+    case thirtyMin = 30
+    case oneHour = 60
+    case twoHours = 120
+    case oneDay = 1440
+    
+    var label: String {
+        switch self {
+        case .atTime: return "At Time"
+        case .tenMin: return "10 min"
+        case .thirtyMin: return "30 min"
+        case .oneHour: return "1 hour"
+        case .twoHours: return "2 hours"
+        case .oneDay: return "1 day"
+        }
+    }
 }
 
 
@@ -72,14 +101,20 @@ class TodoItem: Equatable {
     var icon: TaskIcon
     var dueDate: Date
     var priority: TaskPriority
+    var hasTime: Bool
+    var hasReminder: Bool
+    var reminderOffset: ReminderOffset
     
     
-    init(title: String, note: String? = nil, icon: TaskIcon = .work, dueDate: Date = Date(), priority: TaskPriority = .low) {
+    init(title: String, note: String? = nil, icon: TaskIcon = .work, dueDate: Date = Date(), priority: TaskPriority = .low, hasTime: Bool = false, hasReminder: Bool = false, reminderOffset: ReminderOffset = .atTime) {
         self.title = title
         self.note = note
         self.icon = icon
         self.dueDate = dueDate
         self.priority = priority
+        self.hasTime = hasTime
+        self.hasReminder = hasReminder
+        self.reminderOffset = reminderOffset
     }
     
 }

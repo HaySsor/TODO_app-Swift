@@ -19,7 +19,7 @@ struct AllTasks: View {
             Calendar.current.startOfDay(for: item.dueDate)
         }
         return grouped.sorted(by:{$0.key < $1.key}).map { item in
-            TaskSection(title: formatter.string(from: item.key), items: item.value)
+            TaskSection(title: formatter.string(from: item.key), items: item.value.sorted{$0.priority.sortValue > $1.priority.sortValue})
         }
         
     }

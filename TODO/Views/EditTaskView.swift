@@ -15,6 +15,9 @@ struct EditTaskView: View {
     @State private var localIcon: TaskIcon
     @State private var localDue: Date
     @State private var localPriority: TaskPriority
+    @State private var localHasTime: Bool
+    @State private var localHasReminder: Bool
+    @State private var localReminderOffset: ReminderOffset
     
     @Environment(\.dismiss) private var dismiss
     
@@ -26,11 +29,14 @@ struct EditTaskView: View {
         _localIcon = State(initialValue: task.icon)
         _localDue = State(initialValue: task.dueDate)
         _localPriority = State(initialValue: task.priority)
+        _localHasTime = State(initialValue: task.hasTime)
+        _localHasReminder = State(initialValue: task.hasReminder)
+        _localReminderOffset = State(initialValue: task.reminderOffset)
     }
     
     var body: some View {
         NavigationStack {
-            TaskFormFields(title: $localTitle, note: $localNote, dueDate: $localDue, icon: $localIcon, priority: $localPriority)
+            TaskFormFields(title: $localTitle, note: $localNote, dueDate: $localDue, icon: $localIcon, priority: $localPriority, hasTime: $localHasTime, hasReminder: $localHasReminder, reminderOffset: $localReminderOffset)
             .navigationTitle("New task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -42,6 +48,9 @@ struct EditTaskView: View {
                         task.icon = localIcon
                         task.dueDate = localDue
                         task.priority = localPriority
+                        task.hasTime = localHasTime
+                        task.hasReminder = localHasReminder
+                        task.reminderOffset = localReminderOffset
                         dismiss()
                     }.buttonStyle(.borderedProminent)
                         .tint(.black)

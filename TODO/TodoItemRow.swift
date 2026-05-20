@@ -54,13 +54,19 @@ struct TodoItemRow: View {
                         }
 
                         HStack(spacing: 4) {
-                            Text(formattedTime)
-                                .font(.caption)
-                                .foregroundStyle(.gray)
-                            if let note = item.note, !note.isEmpty {
+                            if item.hasTime {
+                                Text(formattedTime)
+                                    .font(.caption)
+                                    .foregroundStyle(.gray)
+                                
+                            }
+                            if item.hasTime && item.note != nil {
                                 Text("·")
                                     .font(.caption)
                                     .foregroundStyle(.gray)
+                            }
+                            
+                            if let note = item.note, !note.isEmpty {
                                 Text(note)
                                     .font(.caption)
                                     .foregroundStyle(.gray)

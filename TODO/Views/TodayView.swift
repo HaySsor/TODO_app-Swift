@@ -17,8 +17,8 @@ struct TodayView: View {
             return Calendar.current.isDateInToday($0.dueDate)
         }
         
-        let noComplited = today.filter { !$0.isCompleted }
-        let complited = today.filter { $0.isCompleted }
+        let noComplited = today.filter { !$0.isCompleted }.sorted {$0.priority.sortValue > $1.priority.sortValue}
+        let complited = today.filter { $0.isCompleted }.sorted{$0.priority.sortValue > $1.priority.sortValue}
         
         return [
             TaskSection(title: "Not completed", items: noComplited),
