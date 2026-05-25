@@ -19,9 +19,11 @@ class TodoItem: Equatable {
     var hasTime: Bool
     var hasReminder: Bool
     var reminderOffset: ReminderOffset
+    var recurrence: RecurrenceRule = RecurrenceRule.none
+    var hasSpawnedNext: Bool = false
     
     
-    init(title: String, note: String? = nil, icon: TaskIcon = .work, dueDate: Date = Date(), priority: TaskPriority = .low, hasTime: Bool = false, hasReminder: Bool = false, reminderOffset: ReminderOffset = .atTime) {
+    init(title: String, note: String? = nil, icon: TaskIcon = .work, dueDate: Date = Date(), priority: TaskPriority = .low, hasTime: Bool = false, hasReminder: Bool = false, reminderOffset: ReminderOffset = .atTime, recurrence: RecurrenceRule = .none) {
         self.title = title
         self.note = note
         self.icon = icon
@@ -30,6 +32,21 @@ class TodoItem: Equatable {
         self.hasTime = hasTime
         self.hasReminder = hasReminder
         self.reminderOffset = reminderOffset
+        self.recurrence = recurrence
+    }
+    
+    convenience init(copying other: TodoItem, dueDate: Date) {
+        self.init(
+            title: other.title,
+            note: other.note,
+            icon: other.icon,
+            dueDate: dueDate,
+            priority: other.priority,
+            hasTime: other.hasTime,
+            hasReminder: other.hasReminder,
+            reminderOffset: other.reminderOffset,
+            recurrence: other.recurrence
+        )
     }
     
 }

@@ -25,10 +25,20 @@ class TodoViewModel {
     }
     
     func deleteTask(_ item : TodoItem){
-            modelContext.delete(item)
+        modelContext.delete(item)
     }
     
     func toggleTask(_ item: TodoItem){
-            item.isCompleted.toggle()
+        item.isCompleted.toggle()
+        if item.isCompleted && !item.hasSpawnedNext && item.recurrence != .none {
+            let nextDate : Date? = Calendar.current.date(byAdding: item.recurrence.component, value: 1, to: item.dueDate)
+            
+            guard let nextDate = nextDate else { return }
+            
+            let newItem = TodoItem(copying: item, dueDate: nextDate)
+            
+            self.addTask(newItem)
+            item.hasSpawnedNext = true
+        }
     }
 }

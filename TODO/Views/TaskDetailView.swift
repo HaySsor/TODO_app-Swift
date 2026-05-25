@@ -88,6 +88,14 @@ struct TaskDetailView: View {
                                 Text(task.reminderOffset.label).foregroundStyle(.secondary)
                             }
                         }
+                        if task.recurrence != .none {
+                            HStack {
+                                Image(systemName: "repeat")
+                                Text("Recurrence")
+                                Spacer()
+                                Text(task.recurrence.label).foregroundStyle(.secondary)
+                            }
+                        }
                     }
                 }
                 .listStyle(.insetGrouped)
@@ -139,7 +147,7 @@ struct TaskDetailView: View {
 
 #Preview {
     let container = try! ModelContainer(for: TodoItem.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-    let sampleTask = TodoItem(title: "Isc na zakupy", note: "Kupic: Mleko, chleb, jajka", icon: .money, dueDate: Date(), priority: .medium, hasReminder: true)
+    let sampleTask = TodoItem(title: "Isc na zakupy", note: "Kupic: Mleko, chleb, jajka", icon: .money, dueDate: Date(), priority: .medium, hasReminder: true, recurrence: .monthly)
     return NavigationStack {
         TaskDetailView(task: sampleTask)
     }

@@ -32,8 +32,8 @@
 		36A7C9E72FA902E400D1EA4D = {
 			isa = PBXGroup;
 			children = (
-				36A7C9F22FA902E400D1EA4D /* TODO */,
 				36A7C9F12FA902E400D1EA4D /* Products */,
+				36A7C9F22FA902E400D1EA4D /* TODO */,
 			);
 			sourceTree = "<group>";
 		};

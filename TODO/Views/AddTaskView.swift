@@ -18,13 +18,14 @@ struct AddTaskView: View {
     @State private var hasTime: Bool = false
     @State private var hasReminder: Bool = false
     @State private var reminderOffset : ReminderOffset = .tenMin
+    @State private var recurrence: RecurrenceRule = .none
     
     
     var onAdd: (TodoItem) -> Void
     
     var body: some View {
         NavigationStack {
-            TaskFormFields(title: $title, note: $note, dueDate: $dueDate, icon: $taskIcon, priority: $priority, hasTime: $hasTime, hasReminder: $hasReminder, reminderOffset: $reminderOffset)
+            TaskFormFields(title: $title, note: $note, dueDate: $dueDate, icon: $taskIcon, priority: $priority, hasTime: $hasTime, hasReminder: $hasReminder, reminderOffset: $reminderOffset, recurrence: $recurrence)
             .navigationTitle("New task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -34,7 +35,7 @@ struct AddTaskView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        let newItem = TodoItem(title: title, note: note, icon: taskIcon, dueDate: dueDate, priority: priority, hasTime: hasTime, hasReminder: hasReminder, reminderOffset: reminderOffset)
+                        let newItem = TodoItem(title: title, note: note, icon: taskIcon, dueDate: dueDate, priority: priority, hasTime: hasTime, hasReminder: hasReminder, reminderOffset: reminderOffset, recurrence: recurrence)
                         onAdd(newItem)
                         dismiss()
                     }.buttonStyle(.borderedProminent)

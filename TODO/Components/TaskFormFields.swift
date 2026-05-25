@@ -16,6 +16,7 @@ struct TaskFormFields: View {
     @Binding var hasTime: Bool
     @Binding var hasReminder: Bool
     @Binding var reminderOffset: ReminderOffset
+    @Binding var recurrence: RecurrenceRule
     
     
     var body: some View {
@@ -86,8 +87,12 @@ struct TaskFormFields: View {
                         }.pickerStyle(.automatic)
                     }
                 }
+                Picker("Recurring", selection: $recurrence){
+                    ForEach(RecurrenceRule.allCases, id: \.self) { rule in
+                        Text(rule.label).tag(rule)
+                    }
+                }
             }
-            
             
         }
     }
@@ -102,6 +107,7 @@ struct TaskFormFields: View {
         priority: .constant(.low),
         hasTime: .constant(false),
         hasReminder: .constant(true),
-        reminderOffset: .constant(.tenMin)
+        reminderOffset: .constant(.tenMin),
+        recurrence: .constant(.daily)
     )
 }

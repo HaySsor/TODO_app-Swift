@@ -18,6 +18,7 @@ struct EditTaskView: View {
     @State private var localHasTime: Bool
     @State private var localHasReminder: Bool
     @State private var localReminderOffset: ReminderOffset
+    @State private var localRecurrence: RecurrenceRule
     
     @Environment(\.dismiss) private var dismiss
     
@@ -32,11 +33,12 @@ struct EditTaskView: View {
         _localHasTime = State(initialValue: task.hasTime)
         _localHasReminder = State(initialValue: task.hasReminder)
         _localReminderOffset = State(initialValue: task.reminderOffset)
+        _localRecurrence = State(initialValue: task.recurrence)
     }
     
     var body: some View {
         NavigationStack {
-            TaskFormFields(title: $localTitle, note: $localNote, dueDate: $localDue, icon: $localIcon, priority: $localPriority, hasTime: $localHasTime, hasReminder: $localHasReminder, reminderOffset: $localReminderOffset)
+            TaskFormFields(title: $localTitle, note: $localNote, dueDate: $localDue, icon: $localIcon, priority: $localPriority, hasTime: $localHasTime, hasReminder: $localHasReminder, reminderOffset: $localReminderOffset, recurrence: $localRecurrence)
             .navigationTitle("New task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -51,6 +53,7 @@ struct EditTaskView: View {
                         task.hasTime = localHasTime
                         task.hasReminder = localHasReminder
                         task.reminderOffset = localReminderOffset
+                        task.recurrence = localRecurrence
                         dismiss()
                     }.buttonStyle(.borderedProminent)
                         .tint(.black)

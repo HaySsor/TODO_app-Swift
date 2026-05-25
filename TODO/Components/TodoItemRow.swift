@@ -29,23 +29,7 @@ struct TodoItemRow: View {
                 }
             Divider().frame(height: 30)
                 .background(.gray)
-            if item.priority != .none || item.hasReminder {
-                VStack(spacing: 10){
-                    if item.priority != .none {
-                        Image(systemName: item.priority.rawValue)
-                            .font(.subheadline)
-                            .foregroundStyle(.red)
-                    }
-                    if item.hasReminder {
-                        Image(systemName: "bell")
-                            .font(.subheadline)
-                            .foregroundStyle(.blue)
-                    }
-                }
-                
-                Divider().frame(height: 30)
-                    .background(.gray)
-            }
+            
             
             
             NavigationLink {
@@ -91,7 +75,28 @@ struct TodoItemRow: View {
                     }
                     
                     Spacer()
-                    
+                    if item.priority != .none || item.hasReminder || item.recurrence != .none{
+                        Divider().frame(height: 30)
+                            .background(.gray)
+                        HStack(spacing: 10){
+                            if item.recurrence != .none {
+                                Image(systemName: "repeat")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.green)
+                            }
+                            
+                            if item.hasReminder {
+                                Image(systemName: "bell")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.blue)
+                            }
+                            if item.priority != .none {
+                                Image(systemName: item.priority.rawValue)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.red)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -103,6 +108,6 @@ struct TodoItemRow: View {
 
 #Preview {
     NavigationStack {
-        TodoItemRow(item: TodoItem(title: "Przykładowe zadanie", note: "Przykladowy opis", icon: .work, dueDate: Calendar.current.date(bySettingHour: 10, minute: 30, second: 0, of: Date())!, hasReminder: true), onToggle: { })
+        TodoItemRow(item: TodoItem(title: "Przykładowe zadanie", note: "Przykladowy opis", icon: .work, dueDate: Calendar.current.date(bySettingHour: 10, minute: 30, second: 0, of: Date())!, hasReminder: true, recurrence: .daily), onToggle: { })
     }
 }

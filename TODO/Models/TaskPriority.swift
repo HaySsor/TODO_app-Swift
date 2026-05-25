@@ -4,7 +4,8 @@
 //
 //  Created by Przemek Hussar on 25/05/2026.
 //
-
+import SwiftUI
+import SwiftData
 
 enum TaskPriority: String, CaseIterable, Codable {
     case none = "-"
