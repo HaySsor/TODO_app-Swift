@@ -55,6 +55,12 @@ struct EditTaskView: View {
                     }.buttonStyle(.borderedProminent)
                         .tint(.black)
                 }
+                
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel"){
+                        dismiss()
+                    }
+                }
             }
         }
     }

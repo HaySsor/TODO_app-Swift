@@ -9,6 +9,13 @@ import SwiftUI
 import SwiftData
 
 struct TaskPageView: View {
+    @AppStorage("groupingMode") private var groupingModeRaw: String = GroupingMode.byDate.rawValue
+    
+    var groupingMode: GroupingMode {
+        get { GroupingMode(rawValue: groupingModeRaw) ?? .byDate }
+        set { groupingModeRaw = newValue.rawValue }
+    }
+    
     var title: String
     var sections: [TaskSection]
     @Environment(TodoViewModel.self) var viewModel
@@ -36,12 +43,12 @@ struct TaskPageView: View {
                                     }
                                 }
                             }
-                         }
+                        }
                     }
                 }.listStyle(.insetGrouped)
                     .scrollContentBackground(.hidden)
                     .animation(.default, value: sections)
-            
+                
                 Button{
                     showAddTask.toggle()
                 } label: {
@@ -58,6 +65,19 @@ struct TaskPageView: View {
                 
             }.background(Color(.systemGroupedBackground))
                 .navigationTitle("\(title)")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar{
+                    Menu {
+                        Picker("Group by", selection: $groupingModeRaw) {
+                            ForEach(GroupingMode.allCases, id: \.self) { mode in
+                                Text(mode.label).tag(mode.rawValue)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: groupingMode == .byDate ? "calendar" : "list.bullet.circle")
+                            .foregroundStyle( groupingMode == .byDate ? .black : .yellow )
+                    }
+                }
             
                 .sheet(isPresented: $showAddTask) {
                     AddTaskView { item in

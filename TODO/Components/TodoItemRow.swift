@@ -18,19 +18,38 @@ struct TodoItemRow: View {
     }
     
     var body: some View {
-
+        
         HStack(spacing: 12) {
+            
             Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                 .font(.title2)
                 .foregroundStyle(.yellow)
                 .onTapGesture {
                     onToggle()
                 }
-                
             Divider().frame(height: 30)
                 .background(.gray)
+            if item.priority != .none || item.hasReminder {
+                VStack(spacing: 10){
+                    if item.priority != .none {
+                        Image(systemName: item.priority.rawValue)
+                            .font(.subheadline)
+                            .foregroundStyle(.red)
+                    }
+                    if item.hasReminder {
+                        Image(systemName: "bell")
+                            .font(.subheadline)
+                            .foregroundStyle(.blue)
+                    }
+                }
+                
+                Divider().frame(height: 30)
+                    .background(.gray)
+            }
+            
+            
             NavigationLink {
-                EditTaskView(task: item)
+                TaskDetailView(task: item)
             } label: {
                 HStack(spacing: 12) {
                     
@@ -40,19 +59,15 @@ struct TodoItemRow: View {
                                 .font(.headline)
                                 .foregroundStyle(.black)
                             
-                            if item.priority != .none {
-                                Image(systemName: item.priority.rawValue)
-                                    .font(.caption)
-                                    .foregroundStyle(.red)
-                            }
+                            
                             Text(item.title)
                                 .strikethrough(item.isCompleted)
                                 .foregroundStyle(item.isCompleted ? .gray : .primary)
                                 .font(.headline)
                                 .lineLimit(1)
-
+                            
                         }
-
+                        
                         HStack(spacing: 4) {
                             if item.hasTime {
                                 Text(formattedTime)
@@ -74,8 +89,9 @@ struct TodoItemRow: View {
                             }
                         }
                     }
-
+                    
                     Spacer()
+                    
                 }
             }
         }
@@ -87,6 +103,6 @@ struct TodoItemRow: View {
 
 #Preview {
     NavigationStack {
-        TodoItemRow(item: TodoItem(title: "Przykładowe zadanie", note: "Przykladowy opis", icon: .work, dueDate: Calendar.current.date(bySettingHour: 10, minute: 30, second: 0, of: Date())!), onToggle: { })
+        TodoItemRow(item: TodoItem(title: "Przykładowe zadanie", note: "Przykladowy opis", icon: .work, dueDate: Calendar.current.date(bySettingHour: 10, minute: 30, second: 0, of: Date())!, hasReminder: true), onToggle: { })
     }
 }

@@ -11,8 +11,14 @@ import SwiftData
 struct TodayView: View {
     
     @Query var tasks : [TodoItem]
+    @AppStorage("groupingMode") private var groupingModeRaw: String = GroupingMode.byDate.rawValue
     
-    var grupedByStatus: [TaskSection] {
+    var groupingMode: GroupingMode {
+        get { GroupingMode(rawValue: groupingModeRaw) ?? .byDate }
+        set { groupingModeRaw = newValue.rawValue }
+    }
+    
+    var grupedByDay: [TaskSection] {
         let today: [TodoItem] = tasks.filter {
             return Calendar.current.isDateInToday($0.dueDate)
         }
@@ -26,10 +32,31 @@ struct TodayView: View {
         ]
     }
     
-    var body: some View {
+    var groupedByCategory: [TaskSection] {
+        let today: [TodoItem] = tasks.filter {
+            return Calendar.current.isDateInToday($0.dueDate)
+        }
         
-        TaskPageView(title:"Today", sections: grupedByStatus)
-       
+        let grouped = Dictionary(grouping: today) { item in
+            item.icon
+        }
+        
+        return grouped.sorted(by: {$0.key.sortValue < $1.key.sortValue}).map{(icon, items) in
+            TaskSection(title: icon.label, items: items.sorted{$0.priority.sortValue > $1.priority.sortValue})
+        }
+        
+    }
+    
+    var section: [TaskSection]{
+        switch groupingMode{
+        case .byDate: return grupedByDay
+        case .byCategory: return groupedByCategory
+        }
+    }
+    
+    var body: some View {
+        TaskPageView(title:"Today", sections: section)
+            
     }
 }
 

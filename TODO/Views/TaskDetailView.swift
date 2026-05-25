@@ -11,19 +11,33 @@ import SwiftData
 
 struct TaskDetailView: View {
     var task: TodoItem
-
+    
+    @Environment(TodoViewModel.self) var viewModel
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var isEditing: Bool = false
+    @State private var showCheck: Bool = false
+    
+    var doneIcon: String {
+        return task.isCompleted ? "xmark.circle" : "checkmark.circle.fill"
+    }
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
-
+                
                 VStack(spacing: 12) {
-                    Image(systemName: task.icon.rawValue)
-                        .font(.system(size: 50))
+                    Image(systemName: showCheck ? doneIcon : task.icon.rawValue)
+                        .font(.system(size: 60))
+                        .contentTransition(.symbolEffect(.replace.magic(fallback: .downUp.byLayer), options: .nonRepeating))
                         .overlay(alignment: .bottomTrailing) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(task.isCompleted ? .green : .gray)
-                                .onTapGesture { task.isCompleted.toggle() }
+                            if task.isCompleted && !showCheck {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(.green)
+                                    .transition(.scale.combined(with: .opacity))
+                            }
+                            
                         }
 
                     Text(task.title)
@@ -33,43 +47,60 @@ struct TaskDetailView: View {
                 }
                 .padding(.top, 30)
                 .padding(.bottom, 20)
-
+                
                 List {
                     if let note = task.note, !note.isEmpty {
                         Section("Notes") {
                             Text(note)
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.black)
                         }
                     }
-
+                    
                     Section("Details") {
-                        LabeledContent("Category") {
-                            Label(task.icon.label, systemImage: task.icon.rawValue)
+                        HStack {
+                            Image(systemName: "list.bullet.circle")
+                            Text("Category")
+                            Spacer()
+                            Text(task.icon.label).foregroundStyle(.secondary)
                         }
-                        LabeledContent("Date", value: task.dueDate.formatted(date: .abbreviated, time: task.hasTime ? .shortened : .omitted))
+                        HStack {
+                            Image(systemName: "calendar")
+                            Text("Date")
+                            Spacer()
+                            Text(task.dueDate.formatted(date: .abbreviated, time: task.hasTime ? .shortened : .omitted))
+                                .foregroundStyle(.secondary)
+                        }
                         if task.priority != .none {
-                            LabeledContent("Priority") {
-                                Label(task.priority.label, systemImage: task.priority.rawValue)
-                                    .foregroundStyle(.red)
+                            HStack {
+                                Image(systemName: "exclamationmark.circle")
+                                Text("Priority")
+                                Spacer()
+                                Image(systemName: task.priority.rawValue).foregroundStyle(.red)
+                                Text(task.priority.label).foregroundStyle(.secondary)
                             }
                         }
                         if task.hasReminder {
-                            LabeledContent("Reminder") {
-                                Label(task.reminderOffset.label, systemImage: "bell.fill")
-                                    .foregroundStyle(.blue)
+                            HStack {
+                                Image(systemName: "bell.fill")
+                                Text("Reminder")
+                                Spacer()
+                                Text(task.reminderOffset.label).foregroundStyle(.secondary)
                             }
                         }
-                        LabeledContent("Status", value: task.isCompleted ? "Completed" : "Not completed")
                     }
                 }
                 .listStyle(.insetGrouped)
                 .scrollContentBackground(.hidden)
             }
-
+            
             Button {
-                withAnimation {
-                    task.isCompleted.toggle()
+                Task {
+                    withAnimation { showCheck = true }
+                    try? await Task.sleep(for: .seconds(1))
+                    withAnimation { task.isCompleted.toggle()}
+                    withAnimation { showCheck = false }
+                    
                 }
             } label: {
                 Text(task.isCompleted ? "Mark as not done" : "Mark as done")
@@ -78,33 +109,40 @@ struct TaskDetailView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .padding(.horizontal)
-            .padding(.bottom, 8)
+            .padding(.bottom, 20)
             .tint(task.isCompleted ? .gray : .yellow)
         }
         .background(Color(.systemGroupedBackground))
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
-
+                    viewModel.deleteTask(task)
+                    dismiss()
                 } label: {
                     Image(systemName: "trash")
                         .foregroundStyle(.red)
                 }
                 Button {
-
+                    withAnimation {
+                        isEditing.toggle()
+                    }
                 } label: {
                     Image(systemName: "pencil")
                 }
             }
+        }
+        .sheet(isPresented: $isEditing) {
+            EditTaskView(task: task)
         }
     }
 }
 
 #Preview {
     let container = try! ModelContainer(for: TodoItem.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-    let sampleTask = TodoItem(title: "Isc na zakupy", note: "Kupic: Mleko, chleb, jajka", icon: .health, dueDate: Date(), priority: .medium, hasReminder: true)
+    let sampleTask = TodoItem(title: "Isc na zakupy", note: "Kupic: Mleko, chleb, jajka", icon: .money, dueDate: Date(), priority: .medium, hasReminder: true)
     return NavigationStack {
         TaskDetailView(task: sampleTask)
     }
     .modelContainer(container)
+    .environment(TodoViewModel(modelContext: container.mainContext))
 }

@@ -11,6 +11,12 @@ import SwiftData
 
 struct AllTasks: View {
     @Query var tasks: [TodoItem]
+    @AppStorage("groupingMode") private var groupingModeRow: String = GroupingMode.byDate.rawValue
+    
+    var groupingMode: GroupingMode {
+        get {  GroupingMode(rawValue: groupingModeRow) ?? .byDate }
+        set { groupingModeRow =  newValue.rawValue}
+    }
     
     var groupedByDay: [TaskSection] {
         let formatter = DateFormatter()
@@ -24,10 +30,24 @@ struct AllTasks: View {
         
     }
     
+    var groupedByCategory: [TaskSection] {
+        let grouped = Dictionary(grouping: tasks) { item in
+            item.icon
+        }
+        return grouped.sorted(by: {$0.key.sortValue < $1.key.sortValue}).map{(icon, items) in
+            TaskSection(title: icon.label, items: items.sorted{$0.priority.sortValue > $1.priority.sortValue})
+        }
+    }
+    
+    var sections: [TaskSection] {
+        switch groupingMode {
+        case .byDate: return groupedByDay
+        case .byCategory: return groupedByCategory
+        }
+    }
+    
     var body: some View {
-        
-        TaskPageView(title: "All", sections: groupedByDay)
-        
+        TaskPageView(title: "All", sections: sections)
     }
 }
 
