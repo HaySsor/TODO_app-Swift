@@ -14,13 +14,17 @@ struct TaskDetailView: View {
     
     @Environment(TodoViewModel.self) var viewModel
     @Environment(\.dismiss) private var dismiss
-    
+
+    @AppStorage("confirmDelete") private var confirmDelete: Bool = false
+
     @State private var isEditing: Bool = false
     @State private var showCheck: Bool = false
+    @State private var showDeleteAlert: Bool = false
     
     var doneIcon: String {
         return task.isCompleted ? "xmark.circle" : "checkmark.circle.fill"
     }
+    
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -39,7 +43,7 @@ struct TaskDetailView: View {
                             }
                             
                         }
-
+                    
                     Text(task.title)
                         .font(.title)
                         .fontWeight(.bold)
@@ -56,6 +60,8 @@ struct TaskDetailView: View {
                                 .foregroundStyle(.black)
                         }
                     }
+                    
+                    SubtasksSection(task: task)
                     
                     Section("Details") {
                         HStack {
@@ -82,7 +88,7 @@ struct TaskDetailView: View {
                         }
                         if task.hasReminder {
                             HStack {
-                                Image(systemName: "bell.fill")
+                                Image(systemName: "bell")
                                 Text("Reminder")
                                 Spacer()
                                 Text(task.reminderOffset.label).foregroundStyle(.secondary)
@@ -100,13 +106,18 @@ struct TaskDetailView: View {
                 }
                 .listStyle(.insetGrouped)
                 .scrollContentBackground(.hidden)
-            }
+            }.padding(.bottom, 80)
             
             Button {
                 Task {
                     withAnimation { showCheck = true }
                     try? await Task.sleep(for: .seconds(1))
-                    withAnimation { task.isCompleted.toggle()}
+                    withAnimation {
+                        viewModel.toggleTask(task)
+                        if task.isCompleted {
+                            task.subtasks.forEach{ $0.isCompleted = true}
+                        }
+                    }
                     withAnimation { showCheck = false }
                     
                 }
@@ -123,9 +134,24 @@ struct TaskDetailView: View {
         .background(Color(.systemGroupedBackground))
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                Button{
+                    withAnimation {
+                        viewModel.togglePin(task)
+                    }
+                   
+                }label: {
+                    Image(systemName: task.isPinned ? "pin" : "pin.slash")
+                        .foregroundStyle(task.isPinned ? .yellow : .black)
+                        .contentTransition(.symbolEffect(.replace.magic(fallback: .downUp.byLayer), options: .nonRepeating))
+                }
+                
                 Button {
-                    viewModel.deleteTask(task)
-                    dismiss()
+                    if confirmDelete {
+                        showDeleteAlert = true
+                    } else {
+                        viewModel.deleteTask(task)
+                        dismiss()
+                    }
                 } label: {
                     Image(systemName: "trash")
                         .foregroundStyle(.red)
@@ -141,6 +167,15 @@ struct TaskDetailView: View {
         }
         .sheet(isPresented: $isEditing) {
             EditTaskView(task: task)
+        }
+        .alert("Delete task?", isPresented: $showDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                viewModel.deleteTask(task)
+                dismiss()
+            }
+        } message: {
+            Text("'\(task.title)' will be permanently deleted.")
         }
     }
 }

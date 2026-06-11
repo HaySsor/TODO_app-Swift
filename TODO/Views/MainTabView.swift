@@ -22,12 +22,12 @@ struct MainTabView: View {
                     Image(systemName: "calendar")
                     Text("All")
                 }
-            Text("Stats")
+            StatsView()
                 .tabItem {
                     Image(systemName: "chart.bar")
                     Text("Stats")
                 }
-            Text("Settings")
+            SettingsView()
                 .tabItem {
                     Image(systemName: "gear")
                     Text("Settings")

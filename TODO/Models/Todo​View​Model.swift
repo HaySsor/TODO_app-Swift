@@ -28,8 +28,14 @@ class TodoViewModel {
         modelContext.delete(item)
     }
     
+    func togglePin(_ item: TodoItem){
+        item.isPinned.toggle()
+    }
+    
     func toggleTask(_ item: TodoItem){
         item.isCompleted.toggle()
+        item.completedDate = item.isCompleted ? Date() : nil
+        
         if item.isCompleted && !item.hasSpawnedNext && item.recurrence != .none {
             let nextDate : Date? = Calendar.current.date(byAdding: item.recurrence.component, value: 1, to: item.dueDate)
             

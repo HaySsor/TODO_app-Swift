@@ -10,6 +10,8 @@ import SwiftData
 
 struct TaskPageView: View {
     @AppStorage("groupingMode") private var groupingModeRaw: String = GroupingMode.byDate.rawValue
+    @AppStorage("confirmDelete") private var confirmDelete: Bool = false
+    @State private var taskToDelete: TodoItem? = nil
     
     var groupingMode: GroupingMode {
         get { GroupingMode(rawValue: groupingModeRaw) ?? .byDate }
@@ -36,12 +38,18 @@ struct TaskPageView: View {
                                 })
                                 .swipeActions {
                                     Button(role: .destructive) {
-                                        viewModel.deleteTask(item)
+                                        if confirmDelete {
+                                            taskToDelete = item
+                                        } else {
+                                            viewModel.deleteTask(item)
+                                        }
                                     } label: {
                                         Image(systemName: "trash")
                                             .foregroundStyle(.red)
                                     }
+
                                 }
+                                .listRowBackground(item.isPinned ? Color.yellow.opacity(0.2) : Color(.systemBackground))
                             }
                         }
                     }
@@ -83,11 +91,27 @@ struct TaskPageView: View {
                     AddTaskView { item in
                         viewModel.addTask(item)
                     }
-                    
+
                 }
-            
+                .alert(
+                    "Delete task?",
+                    isPresented: Binding(
+                        get: { taskToDelete != nil },
+                        set: { if !$0 { taskToDelete = nil } }
+                    ),
+                    presenting: taskToDelete
+                ) { task in
+                    Button("Cancel", role: .cancel) { }
+                    Button("Delete", role: .destructive) {
+                        viewModel.deleteTask(task)
+                        taskToDelete = nil
+                    }
+                } message: { task in
+                    Text("'\(task.title)' will be permanently deleted.")
+                }
+
         }
-        
+
     }
 }
 

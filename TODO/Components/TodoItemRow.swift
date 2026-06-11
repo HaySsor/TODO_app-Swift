@@ -19,88 +19,113 @@ struct TodoItemRow: View {
     
     var body: some View {
         
-        HStack(spacing: 12) {
-            
-            Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
-                .font(.title2)
-                .foregroundStyle(.yellow)
-                .onTapGesture {
-                    onToggle()
-                }
-            Divider().frame(height: 30)
-                .background(.gray)
-            
-            
-            
+        VStack{
             NavigationLink {
                 TaskDetailView(task: item)
             } label: {
-                HStack(spacing: 12) {
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack(spacing: 4) {
-                            Image(systemName: item.icon.rawValue)
-                                .font(.headline)
-                                .foregroundStyle(.black)
-                            
-                            
-                            Text(item.title)
-                                .strikethrough(item.isCompleted)
-                                .foregroundStyle(item.isCompleted ? .gray : .primary)
-                                .font(.headline)
-                                .lineLimit(1)
-                            
-                        }
+                VStack(alignment:.leading, spacing: 10){
+                    HStack(spacing: 10){
+                        Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+                            .font(.title2 )
+                            .foregroundStyle(.yellow)
+                            .onTapGesture {
+                                onToggle()
+                            }
                         
-                        HStack(spacing: 4) {
-                            if item.hasTime {
-                                Text(formattedTime)
-                                    .font(.caption)
-                                    .foregroundStyle(.gray)
+                        VStack(alignment: .leading) {
+                            HStack(spacing: 2) {
+                                Image(systemName: item.icon.rawValue)
+                                    .font(.headline)
+                                    .foregroundStyle(.black)
+                                
+                                
+                                Text(item.title)
+                                    .strikethrough(item.isCompleted)
+                                    .foregroundStyle(item.isCompleted ? .gray : .primary)
+                                    .font(.headline)
+                                    .lineLimit(1)
                                 
                             }
-                            if item.hasTime && item.note != nil {
-                                Text("·")
-                                    .font(.caption)
-                                    .foregroundStyle(.gray)
-                            }
                             
-                            if let note = item.note, !note.isEmpty {
-                                Text(note)
-                                    .font(.caption)
-                                    .foregroundStyle(.gray)
-                                    .lineLimit(1)
+                            HStack {
+                                if item.hasTime {
+                                    Text(formattedTime)
+                                        .font(.caption)
+                                        .foregroundStyle(.gray)
+                                    
+                                }
+                                if item.hasTime && item.note != nil {
+                                    Text("·")
+                                        .font(.caption)
+                                        .foregroundStyle(.gray)
+                                }
+                                
+                                if let note = item.note, !note.isEmpty {
+                                    Text(note)
+                                        .font(.caption)
+                                        .foregroundStyle(.gray)
+                                        .lineLimit(1)
+                                }
                             }
                         }
                     }
                     
-                    Spacer()
-                    if item.priority != .none || item.hasReminder || item.recurrence != .none{
-                        Divider().frame(height: 30)
-                            .background(.gray)
-                        HStack(spacing: 10){
-                            if item.recurrence != .none {
+
+                        
+                        
+                        HStack {
+                            
+                            HStack(spacing: 10){
+                                
                                 Image(systemName: "repeat")
                                     .font(.subheadline)
-                                    .foregroundStyle(.green)
-                            }
-                            
-                            if item.hasReminder {
+                                    .foregroundStyle(item.recurrence != .none ? .green : .gray.opacity(0.3))
+                                
+                                
+                                
                                 Image(systemName: "bell")
                                     .font(.subheadline)
-                                    .foregroundStyle(.blue)
-                            }
-                            if item.priority != .none {
-                                Image(systemName: item.priority.rawValue)
+                                    .foregroundStyle(item.hasReminder ? .blue : .gray.opacity(0.3))
+                                
+                                
+                                Image(systemName: item.priority != .none ? item.priority.rawValue : "exclamationmark")
                                     .font(.subheadline)
-                                    .foregroundStyle(.red)
+                                    .foregroundStyle(item.priority != .none ? .red : .gray.opacity(0.3))
+                                
                             }
+                            
+                            
+                            Spacer()
+                            
+                            if !item.subtasks.isEmpty {
+                                HStack{
+                                    Image(systemName: "checklist")
+                                        .font(.caption)
+                                        .foregroundStyle(.gray)
+                                    
+                                    ProgressView(
+                                        value: Double(item.subtasks.filter { $0.isCompleted }.count),
+                                        total: Double(item.subtasks.count)
+                                    )
+                                    .frame(width: 60)
+                                    
+                                    Text("\(item.subtasks.filter { $0.isCompleted }.count) of \(item.subtasks.count)")
+                                        .font(.caption)
+                                        .foregroundStyle(.gray)
+                                }
+                                
+                            }
+                            
                         }
                     }
-                }
+                    
+                
+                
             }
+            
         }
-        .contentShape(Rectangle())
+        .frame(maxWidth: .infinity)
+        
     }
 }
 
@@ -108,6 +133,9 @@ struct TodoItemRow: View {
 
 #Preview {
     NavigationStack {
-        TodoItemRow(item: TodoItem(title: "Przykładowe zadanie", note: "Przykladowy opis", icon: .work, dueDate: Calendar.current.date(bySettingHour: 10, minute: 30, second: 0, of: Date())!, hasReminder: true, recurrence: .daily), onToggle: { })
+        TodoItemRow(item: TodoItem(title: "Przykładowe zadanie", note: "Przykladowy opis", icon: .work, dueDate: Calendar.current.date(bySettingHour: 10, minute: 30, second: 0, of: Date())!, hasReminder: false, recurrence: .none, subtasks: [
+            Subtask(title: "Subtask 1", isCompleted: true),
+            Subtask(title: "Subtask 2", isCompleted: false)
+        ], isPinned: true), onToggle: { })
     }
 }

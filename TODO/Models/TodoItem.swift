@@ -9,6 +9,8 @@ import SwiftData
 
 @Model
 class TodoItem: Equatable {
+    @Relationship(deleteRule:.cascade, inverse: \Subtask.parent)
+    
     var id: UUID = UUID()
     var title : String
     var isCompleted: Bool = false
@@ -21,9 +23,12 @@ class TodoItem: Equatable {
     var reminderOffset: ReminderOffset
     var recurrence: RecurrenceRule = RecurrenceRule.none
     var hasSpawnedNext: Bool = false
+    var subtasks: [Subtask] = []
+    var isPinned: Bool = false
+    var completedDate: Date? = nil
     
     
-    init(title: String, note: String? = nil, icon: TaskIcon = .work, dueDate: Date = Date(), priority: TaskPriority = .low, hasTime: Bool = false, hasReminder: Bool = false, reminderOffset: ReminderOffset = .atTime, recurrence: RecurrenceRule = .none) {
+    init(title: String, note: String? = nil, icon: TaskIcon = .work, dueDate: Date = Date(), priority: TaskPriority = .low, hasTime: Bool = false, hasReminder: Bool = false, reminderOffset: ReminderOffset = .atTime, recurrence: RecurrenceRule = .none, subtasks: [Subtask] = [] , isPinned: Bool = false, completedDate: Date? = nil) {
         self.title = title
         self.note = note
         self.icon = icon
@@ -33,6 +38,9 @@ class TodoItem: Equatable {
         self.hasReminder = hasReminder
         self.reminderOffset = reminderOffset
         self.recurrence = recurrence
+        self.subtasks = subtasks
+        self.isPinned = isPinned
+        self.completedDate = completedDate
     }
     
     convenience init(copying other: TodoItem, dueDate: Date) {

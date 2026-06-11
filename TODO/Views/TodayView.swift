@@ -12,6 +12,7 @@ struct TodayView: View {
     
     @Query var tasks : [TodoItem]
     @AppStorage("groupingMode") private var groupingModeRaw: String = GroupingMode.byDate.rawValue
+    @AppStorage("showCompleted") private var showCompleted:Bool = true
     
     var groupingMode: GroupingMode {
         get { GroupingMode(rawValue: groupingModeRaw) ?? .byDate }
@@ -23,13 +24,25 @@ struct TodayView: View {
             return Calendar.current.isDateInToday($0.dueDate)
         }
         
-        let noComplited = today.filter { !$0.isCompleted }.sorted {$0.priority.sortValue > $1.priority.sortValue}
+        let noComplited = today.filter { !$0.isCompleted && !$0.isPinned }.sorted {$0.priority.sortValue > $1.priority.sortValue}
         let complited = today.filter { $0.isCompleted }.sorted{$0.priority.sortValue > $1.priority.sortValue}
+        let pinned = today
+            .filter { $0.isPinned && !$0.isCompleted }
+            .sorted { $0.priority.sortValue > $1.priority.sortValue }
         
-        return [
+        var taskSections : [TaskSection] = [
             TaskSection(title: "Not completed", items: noComplited),
-            TaskSection(title: "Completed", items: complited)
         ]
+        
+        if !pinned.isEmpty {
+            taskSections.insert(TaskSection(title: "Pinned", items: pinned), at: 0)
+        }
+        
+        if showCompleted {
+            taskSections.append(TaskSection(title: "Completed", items: complited))
+        }
+        
+        return taskSections
     }
     
     var groupedByCategory: [TaskSection] {
@@ -37,15 +50,29 @@ struct TodayView: View {
             return Calendar.current.isDateInToday($0.dueDate)
         }
         
-        let grouped = Dictionary(grouping: today) { item in
+        func isVisible(_ task: TodoItem) -> Bool {
+            showCompleted || !task.isCompleted
+        }
+        
+        let noPinned = today.filter { !$0.isPinned && isVisible($0) }
+        let pinned = today.filter{ $0.isPinned && isVisible($0) }.sorted{$0.priority.sortValue > $1.priority.sortValue}
+        
+        let grouped = Dictionary(grouping: noPinned) { item in
             item.icon
         }
         
-        return grouped.sorted(by: {$0.key.sortValue < $1.key.sortValue}).map{(icon, items) in
+        let sections = grouped.sorted(by: {$0.key.sortValue < $1.key.sortValue}).map{(icon, items) in
             TaskSection(title: icon.label, items: items.sorted{$0.priority.sortValue > $1.priority.sortValue})
         }
         
+        if(pinned.isEmpty){
+            return sections
+        }
+        return [TaskSection(title: "Pinned", items: pinned)] + sections
+        
     }
+    
+    
     
     var section: [TaskSection]{
         switch groupingMode{
